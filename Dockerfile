@@ -30,6 +30,7 @@ RUN --mount=type=cache,target=/ccache \
 
 # Install vmlinuz
 RUN mkdir -p /tmp/output/boot && \
+    cp vmlinux /tmp/output/boot/ && \
     find ./ -type f -name '*Image' -exec cp -v {} /tmp/output/boot/vmlinuz \;
 
 # Install modules in /usr/lib/modules, with a symlink from /lib to
