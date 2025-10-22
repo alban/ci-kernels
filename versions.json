@@ -1,5 +1,9 @@
 [
   {
+    "version": "7.1-rc1-patch-alban-5116f3e6983dfa0c98a1aa29c6c867079e2bcd1c",
+    "static_tag": ""
+  },
+  {
     "version": "6.19-rc4",
     "static_tag": "mainline"
   },
