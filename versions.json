@@ -1,9 +1,5 @@
 [
   {
-    "version": "7.3-rc5",
-    "static_tag": "mainline"
-  },
-  {
     "version": "7.2.8",
     "static_tag": "stable"
   },
