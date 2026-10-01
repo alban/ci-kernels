@@ -41,6 +41,10 @@ jobs:
     needs: config
     uses: ./.github/workflows/build-and-push.yml
     strategy:
+      # Kernel versions are independent of each other: a failure in one must not
+      # cancel the others, or a single flaky download keeps every other image
+      # from being published.
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.config.outputs.matrix) }}
     with:

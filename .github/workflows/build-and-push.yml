@@ -177,7 +177,14 @@ jobs:
         vimto -kernel "$kernel" exec -- /bin/true && echo ok
 
     - name: Build selftests
+      id: selftests
       if: ${{ inputs.static_tag != '' }}
+      # Selftests break upstream regularly and are not consumed by Inspektor
+      # Gadget, so a stale -selftests tag is preferable to blocking the kernel
+      # images, which are pushed by an earlier step. Adapted from upstream
+      # cilium/ci-kernels f42297c ("ci: tolerate broken selftest builds"), which
+      # could not be cherry-picked as it depends on the newer promote.sh tagging.
+      continue-on-error: true
       uses: docker/build-push-action@v5
       with:
         target: selftests-bpf
@@ -192,7 +199,10 @@ jobs:
         outputs: ${{ github.ref == 'refs/heads/main' && 'type=registry' || 'type=local,dest=/tmp/build/selftests-bpf' }}
 
     - name: Build selftests (debug)
-      if: ${{ inputs.static_tag != '' }}
+      id: selftests-debug
+      # No point attempting the same broken build twice if selftests failed.
+      if: ${{ inputs.static_tag != '' && steps.selftests.outcome != 'failure' }}
+      continue-on-error: true
       uses: docker/build-push-action@v5
       with:
         target: selftests-bpf-debug
@@ -205,6 +215,22 @@ jobs:
         labels: ${{ steps.selftests-debug-meta.outputs.labels }}
         annotations: ${{ steps.selftests-debug-meta.outputs.annotations }}
         outputs: ${{ github.ref == 'refs/heads/main' && 'type=registry' || 'type=local,dest=/tmp/build/selftests-bpf-debug' }}
+
+    - name: Report tolerated selftests failure
+      if: >-
+        steps.selftests.outcome == 'failure' ||
+        steps.selftests-debug.outcome == 'failure'
+      env:
+        VERSION: ${{ inputs.kernel_version }}
+        STATIC_TAG: ${{ inputs.static_tag }}
+      run: |
+        echo "::error title=Selftests build failed for $VERSION::No selftests images published. $STATIC_TAG-selftests(-debug) keeps pointing at the previous version."
+        {
+          echo "## :warning: Selftests build failed for $VERSION"
+          echo
+          echo "The kernel images were published; only the selftests images were skipped."
+          echo "\`$STATIC_TAG-selftests\` and \`$STATIC_TAG-selftests-debug\` still point at the previous successful build."
+        } >> "$GITHUB_STEP_SUMMARY"
 
     - name: Store artifacts
       if: github.ref != 'refs/heads/main'
