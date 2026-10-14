@@ -59,6 +59,11 @@ for cfg in "${!overrides[@]}"; do
 	config[$cfg]="${overrides[$cfg]}"
 done
 
+# CONFIG_LSM is a string whose default depends on the DEFAULT_SECURITY_* choice.
+# Drop the value inherited from defconfig, so that olddefconfig derives it
+# from the merged choice instead of keeping the defconfig one.
+unset 'config[CONFIG_LSM]'
+
 rm .config
 for cfg in "${!config[@]}"; do
 	echo "$cfg=${config[$cfg]}" >> .config

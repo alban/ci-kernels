@@ -102,6 +102,12 @@ CONFIG_KALLSYMS_ALL=y
 CONFIG_SECURITY_NETWORK=y
 CONFIG_SECURITY_PATH=y
 CONFIG_SECURITY_SELINUX=y
+# Building SELinux is not enough: it must also be in CONFIG_LSM to be
+# initialised at boot, and vimto cannot pass lsm= on the command line. The
+# arm64 defconfig picks DEFAULT_SECURITY_DAC, whose CONFIG_LSM default leaves
+# selinux out; x86_64 picks SELinux already.
+CONFIG_DEFAULT_SECURITY_SELINUX=y
+# CONFIG_DEFAULT_SECURITY_DAC is not set
 
 # VirtIO
 CONFIG_HW_RANDOM_VIRTIO=y
