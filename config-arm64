@@ -1,5 +1,8 @@
 # arm64 specific configuration
 
+# On 5.10 and 5.15, bpf_preload_umd links libbpf against the target's libelf
+# and zlib, which the builder image only has for amd64.
+CONFIG_BPF_PRELOAD=n
 CONFIG_PCI_HOST_GENERIC=y
 CONFIG_SERIAL_AMBA_PL011_CONSOLE=y
 CONFIG_SERIAL_AMBA_PL011=y
